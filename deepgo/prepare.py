@@ -83,7 +83,7 @@ def prepare(args=None):
                     board.append(b.unsqueeze(0).cpu().numpy().copy())
 
             if winner is not None:
-                if not os.path.isfile(npz_filename):
+                if not os.path.isfile(npz_filename) and len(node) > 1:
                     np.savez_compressed(npz_filename,
                                         b=np.concatenate(board), p=np.array(player), m=np.array(move), w=winner)
                 info.write("{} {}\n".format(gamename, len(node) - 1))
