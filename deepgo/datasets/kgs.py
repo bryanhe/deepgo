@@ -23,16 +23,10 @@ class KGS(torch.utils.data.Dataset):
         return self.len
 
     def __getitem__(self, i):
-        b = []
-        # TODO: maybe just stack everything in one npz?
-        for move in range(-6, 2):
-            move += self.move_index[i]
-            if move < 1:
-                move = 1
-            data = np.load(os.path.join(deepgo.config.KGS_PROCESSED_ROOT, self.filename[self.game_index[i]], "{}.npz".format(move)))
-            b.append(data["b"])
-        b = np.concatenate(b + [np.full((1, 19, 19), data["p"])])
-        b = torch.as_tensor(b, dtype=torch.float)
-        m = torch.tensor(data["m"])
+        data = np.load(os.path.join(deepgo.config.KGS_PROCESSED_ROOT, "{}.npz".format(self.filename[self.game_index[i]])))
+        ind = np.array(range(-7, 1)) + self.move_index[i]
+        ind[ind < 0] = 0
+        b = torch.as_tensor(np.concatenate([data["b"][ind, :, :, :].reshape(16, 19, 19)] + [np.full((1, 19, 19), data["p"][self.move_index[i]])]), dtype=torch.float)
+        m = torch.tensor(data["m"][self.move_index[i]])
         w = torch.tensor(data["w"])
         return b, m, w

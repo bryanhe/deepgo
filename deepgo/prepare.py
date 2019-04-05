@@ -7,6 +7,7 @@ import pathlib
 import glob
 import os
 import tqdm
+import time
 
 def prepare(args=None):
     
@@ -19,6 +20,7 @@ def prepare(args=None):
 
     with open(os.path.join(deepgo.config.KGS_PROCESSED_ROOT, "info.txt"), "w") as info:
         for filename in tqdm.tqdm(glob.glob(os.path.join(deepgo.config.KGS_ROOT, "*", "*.sgf"))):
+            t = time.time()
             try:
                 with open(filename) as f:
                     f = sgf.parse(f.read())
@@ -32,14 +34,16 @@ def prepare(args=None):
                 continue
 
             gamename = os.path.splitext(os.path.basename(filename))[0]
-            pathlib.Path(os.path.join(deepgo.config.KGS_PROCESSED_ROOT, gamename)).mkdir(parents=True, exist_ok=True)
-            board = torch.zeros((2, 19, 19), device=device, dtype=torch.uint8)
+            board = []
+            player = []
+            move = []
+            b = torch.zeros((2, 19, 19), device=device, dtype=torch.uint8)
             for (ind, n) in enumerate(node):
                 if ind == 0:
                     if "AB" in n.properties:
                         for x in n.properties["AB"]:
                             i, j = deepgo.utils.utils.to_coord(x)
-                            board[0, i, j] = 1
+                            b[0, i, j] = 1
                     if "RE" not in n.properties:
                         logger.warning("{} does not have a result.".format(gamename))
                         winner = None
@@ -50,30 +54,31 @@ def prepare(args=None):
                         winner = 1
                     else:
                         raise ValueError()
-                    if os.path.isfile(os.path.join(deepgo.config.KGS_PROCESSED_ROOT, gamename, "{}.npz".format(len(node) - 1))):
-                        break
                 else:
                     assert(("B" in n.properties) != ("W" in n.properties))
                     if "B" in n.properties:
-                        player = 0
-                        move = n.properties["B"]
+                        p = 0
+                        m = n.properties["B"]
                     elif "W" in n.properties:
-                        player = 1
-                        move = n.properties["W"]
+                        p = 1
+                        m = n.properties["W"]
+                    player.append(p)
 
-                    assert(len(move) == 1)
-                    move = move[0]
-                    if move == "":
+                    assert(len(m) == 1)
+                    m = m[0]
+                    if m == "":
                         # player chose to pass
                         m = 19 * 19
                     else:
-                        i, j = deepgo.utils.utils.to_coord(move)
-                        board[player, i, j] = 1
-                        deepgo.utils.utils.capture(board, 1 - player)  # TODO: assumes that moves won't results in own capture
+                        i, j = deepgo.utils.utils.to_coord(m)
+                        b[p, i, j] = 1
+                        deepgo.utils.utils.capture(b, 1 - p)  # TODO: assumes that moves won't results in own capture
                         m = i * 19 + j
 
-                    np.savez_compressed(os.path.join(deepgo.config.KGS_PROCESSED_ROOT, gamename, "{}.npz".format(ind)),
-                                        b=board.cpu(), p=player, m=m, w=winner)
+                    move.append(m)
+                    board.append(b.unsqueeze(0).cpu().numpy().copy())
 
             if winner is not None:
+                np.savez_compressed(os.path.join(deepgo.config.KGS_PROCESSED_ROOT, "{}.npz".format(gamename)),
+                                    b=np.concatenate(board), p=np.array(player), m=np.array(move), w=winner)
                 info.write("{} {}\n".format(gamename, len(node) - 1))
