@@ -78,7 +78,7 @@ def train(args=None):
 
                 # Policy loss
                 loss_p = torch.nn.functional.cross_entropy(p_hat, p, reduction='sum')
-                correct_p = torch.sum(torch.argmax(p_hat, dim=1) == p).cpu().detach().numpy()
+                correct_p += torch.sum(torch.argmax(p_hat, dim=1) == p).cpu().detach().numpy()
 
                 # Value loss
                 y_hat = torch.squeeze(y_hat, dim=1)
