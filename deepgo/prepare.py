@@ -55,7 +55,9 @@ def prepare(args=None):
                     elif n.properties["RE"][0][0] == "W":
                         winner = 1
                     else:
-                        raise ValueError()
+                        logger.warning("{} has result \"{}\".".format(gamename, n.properties["RE"][0]))
+                        winner = None
+                        break
                     if os.path.isfile(npz_filename):
                         break
                 else:
