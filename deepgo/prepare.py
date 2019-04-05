@@ -34,6 +34,8 @@ def prepare(args=None):
                 continue
 
             gamename = os.path.splitext(os.path.basename(filename))[0]
+            npz_filename = os.path.join(deepgo.config.KGS_PROCESSED_ROOT, "{}.npz".format(gamename))
+
             board = []
             player = []
             move = []
@@ -54,6 +56,8 @@ def prepare(args=None):
                         winner = 1
                     else:
                         raise ValueError()
+                    if os.path.isfile(npz_filename):
+                        break
                 else:
                     assert(("B" in n.properties) != ("W" in n.properties))
                     if "B" in n.properties:
@@ -79,6 +83,7 @@ def prepare(args=None):
                     board.append(b.unsqueeze(0).cpu().numpy().copy())
 
             if winner is not None:
-                np.savez_compressed(os.path.join(deepgo.config.KGS_PROCESSED_ROOT, "{}.npz".format(gamename)),
-                                    b=np.concatenate(board), p=np.array(player), m=np.array(move), w=winner)
+                if not os.path.isfile(npz_filename):
+                    np.savez_compressed(npz_filename,
+                                        b=np.concatenate(board), p=np.array(player), m=np.array(move), w=winner)
                 info.write("{} {}\n".format(gamename, len(node) - 1))
