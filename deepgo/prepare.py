@@ -72,6 +72,7 @@ def prepare(args=None):
 
                     assert(len(m) == 1)
                     m = m[0]
+                    board.append(b.unsqueeze(0).cpu().numpy().copy())
                     if m == "":
                         # player chose to pass
                         m = 19 * 19
@@ -82,7 +83,6 @@ def prepare(args=None):
                         m = i * 19 + j
 
                     move.append(m)
-                    board.append(b.unsqueeze(0).cpu().numpy().copy())
 
             if winner is not None:
                 if not os.path.isfile(npz_filename) and len(node) > 1:
