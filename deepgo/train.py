@@ -87,11 +87,17 @@ def train(args=None):
 
                 loss = loss_p + loss_y
                 total += loss.detach().cpu().numpy()
+                total_p += loss_p.detach().cpu().numpy()
+                total_y += loss_y.detach().cpu().numpy()
                 n += X.shape[0]
 
                 message = ""
                 message += "{:8d} / {:d} ({:4.0f} / {:4.0f}):".format(i + 1, len(loader), time.time() - t, (time.time() - t) * len(loader) / (i + 1))
                 message += "    Loss={:.3f}".format(total / n)
+                message += "    Policy={:.3f}".format(total_p / n)
+                message += "    Value={:.3f}".format(total_y / n)
+                message += "    Policy={:.3f}".format(correct_p / n)
+                message += "    Value={:.3f}".format(correct_y / n)
                 logger.debug(message)
 
                 if dataset == "train":
