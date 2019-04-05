@@ -19,9 +19,8 @@ def train(args=None):
     device = ("cuda" if args.gpu else "cpu")
 
     ### Dataset setup ###
-    # TODO
     train_dataset = deepgo.datasets.KGS(split="train")
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch, num_workers=args.workers, shuffle=False, pin_memory=args.gpu)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch, num_workers=args.workers, shuffle=True, pin_memory=args.gpu)
 
     test_dataset = deepgo.datasets.KGS(split="test")
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch, num_workers=args.workers, shuffle=True, pin_memory=args.gpu)
@@ -79,6 +78,7 @@ def train(args=None):
 
                 # Policy loss
                 loss_p = torch.nn.functional.cross_entropy(p_hat, p, reduction='sum')
+                correct_p = torch.sum(torch.argmax(p_hat, dim=1) == p).cpu().detach().numpy()
 
                 # Value loss
                 y_hat = torch.squeeze(y_hat, dim=1)

@@ -8,9 +8,20 @@ import numpy as np
 
 class KGS(torch.utils.data.Dataset):
     def __init__(self, split="train"):
-        # TODO: actually use split
         with open(os.path.join(deepgo.config.KGS_PROCESSED_ROOT, "info.txt")) as f:
             self.filename, self.move = zip(*map(lambda x: (x.split()[0], int(x.split()[1])), f.readlines()))
+
+        # TODO: shuffle games?
+        n_games = len(self.filename)
+        if split == "train":
+            self.filename = self.filename[:round(0.8 * n_games)]
+            self.move = self.move[:round(0.8 * n_games)]
+        elif split == "test":
+            self.filename = self.filename[round(0.8 * n_games):]
+            self.move = self.move[round(0.8 * n_games):]
+        else:
+            raise ValueError()
+
 
         self.len = sum(self.move)
         self.game_index = []

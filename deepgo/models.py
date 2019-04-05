@@ -80,6 +80,13 @@ class Dual(torch.nn.Module):
         self.policy = _PolicyHead(filters, policy_channels)
         self.value = _ValueHead(filters, value_hidden_dim)
 
+        for m in self.modules():
+            if isinstance(m, torch.nn.Conv2d):
+                torch.nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            elif isinstance(m, torch.nn.BatchNorm2d):
+                torch.nn.init.constant_(m.weight, 1)
+                torch.nn.init.constant_(m.bias, 0)
+
     def forward(self, x):
         x = self.conv(x)
         x = self.layer(x)
