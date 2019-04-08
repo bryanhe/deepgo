@@ -105,8 +105,7 @@ def train(args=None):
                     loss.backward()
                     optim.step()
 
-            # Saving after test so that if information from test is needed, they will not get skipped
-            if dataset == "test" and args.checkpoint is not None and ((epoch + 1) % args.checkpoint_every) == 0:
+            if dataset == "train" and args.checkpoint is not None and ((epoch + 1) % args.checkpoint_every) == 0:
                 pathlib.Path(os.path.dirname(args.checkpoint)).mkdir(parents=True, exist_ok=True)
                 # TODO: if model is on gpu, does loading automatically put on gpu?
                 # https://discuss.pytorch.org/t/how-to-store-model-which-trained-by-multi-gpus-dataparallel/6526

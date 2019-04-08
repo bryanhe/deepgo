@@ -35,7 +35,7 @@ class KGS(torch.utils.data.Dataset):
 
     def __getitem__(self, i):
         data = np.load(os.path.join(deepgo.config.KGS_PROCESSED_ROOT, "{}.npz".format(self.filename[self.game_index[i]])))
-        ind = np.array(range(-7, 1)) + self.move_index[i]
+        ind = self.move_index[i] - np.array(range(8))
         ind[ind < 0] = 0
         b = torch.as_tensor(np.concatenate([data["b"][ind, :, :, :].reshape(16, 19, 19)] + [np.full((1, 19, 19), data["p"][self.move_index[i]])]), dtype=torch.float)
         m = torch.tensor(data["m"][self.move_index[i]])
