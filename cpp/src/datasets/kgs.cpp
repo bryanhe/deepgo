@@ -9,11 +9,11 @@ KGS::KGS(const std::string &root, Mode mode) {
 }
 
 torch::data::Example<> KGS::get(size_t index) {
-  return {at::zeros({17, 19, 19}), at::zeros({1})};
+  return {torch::zeros({17, 19, 19}), torch::zeros({1}, torch::kLong)};
   // return {at::zeros({17, 19, 19}), at::zeros({1}), at::zeros({1})};
   // return {images_[index], targets_[index]};
 }
 
 at::optional<size_t> KGS::size() const {
-  return 1;
+  return 1024;
 }

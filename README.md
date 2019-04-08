@@ -45,3 +45,6 @@ https://discuss.pytorch.org/t/libtorch-cmake-issues/28246
 grep culibos `find .`
 
 https://github.com/pytorch/examples/pull/506
+
+export LD_LIBRARY_PATH=/home/bryanhe/deepgo/cpp/external/libtorch/:${LD_LIBRARY_PATH}
+
